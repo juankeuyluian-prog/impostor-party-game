@@ -30,6 +30,14 @@ const App: React.FC = () => {
     }));
   };
 
+  const handleBack = () => {
+    setGameState(prev => {
+      if (prev.phase === GamePhase.ADD_PLAYERS) return { ...prev, phase: GamePhase.HOME };
+      if (prev.phase === GamePhase.ADD_WORDS) return { ...prev, phase: GamePhase.ADD_PLAYERS };
+      return prev;
+    });
+  };
+
   const startGame = (words: string[]) => {
     const randomWord = words[Math.floor(Math.random() * words.length)];
     const randomImpostor = Math.floor(Math.random() * gameState.players.length);
@@ -74,8 +82,8 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-start sm:justify-center p-4 sm:p-8 overflow-y-auto">
-      <div className="w-full max-w-lg transition-all duration-500 my-auto">
+    <div className="flex-1 w-full flex flex-col items-center justify-center p-4 sm:p-6 md:p-8">
+      <div className="w-full max-w-lg transition-all duration-500 flex flex-col justify-center min-h-0">
         {gameState.phase === GamePhase.HOME && (
           <Home onCreate={createGame} />
         )}
@@ -83,6 +91,7 @@ const App: React.FC = () => {
         {gameState.phase === GamePhase.ADD_PLAYERS && (
           <AddPlayers 
             onConfirm={handlePlayersConfirmed} 
+            onBack={handleBack}
             initialPlayers={gameState.players} 
           />
         )}
@@ -91,6 +100,7 @@ const App: React.FC = () => {
           <AddWords 
             playerCount={gameState.players.length}
             onStart={startGame}
+            onBack={handleBack}
           />
         )}
 
