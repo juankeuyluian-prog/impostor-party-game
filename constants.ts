@@ -1,13 +1,12 @@
 
 export const WORD_CATEGORIES = {
-  RANDOM: "Martín Cirio, Riquelme, Mernosketti, Hitler, El peronísmo, Nico Ochiatto, OLGA, Luzu TV, Dillom, Globant, San Martín, Chat GPT, Milei, Cristina Kischner, Messi",
-  Animales: "León, Tigre, Oso, Elefante, Jirafa, Pingüino, Tiburón, Canguro, Koala, Delfín",
-  Comida: "Pizza, Sushi, Hamburguesa, Tacos, Pasta, Panqueques, Ensalada, Chocolate, Helado, Filete",
-  Películas: "Matrix, Star Wars, Inception, Titanic, Avatar, Tiburón, Gladiador, Shrek, Frozen, Psicosis",
-  Países: "Japón, Brasil, Francia, Canadá, Egipto, Australia, Italia, India, México, Alemania",
-  Deportes: "Fútbol, Tenis, Boxeo, Golf, Cricket, Natación, Hockey, Karate, Béisbol, Rugby",
-  Colores: "Magenta, Índigo, Turquesa, Carmesí, Lavanda, Esmeralda, Ámbar, Turquesa, Granate, Durazno",
-  Empleos: "Doctor, Piloto, Chef, Bombero, Artista, Abogado, Granjero, Bailarín, Enfermero, Científico"
+  RANDOM: "Martín Cirio, Riquelme, Messi, El peronísmo, Nico Occhiato, OLGA, Luzu TV, Dillom, Mate, Choripán, Obelisco, Carlos Gardel, Susana Giménez, Ricardo Fort, El Diego, Bizarrap",
+  Animales: "Carpincho, Yaguareté, Hornero, Ñandú, Puma, Pingüino, Lobo Marino, Mulita, Tero, Guanaco",
+  Morfi: "Asado, Empanadas, Milanesa, Choripán, Locro, Dulce de leche, Alfajor, Medialunas, Facturas, Fernet",
+  Cultura: "Esperando la carroza, Relatos Salvajes, El secreto de sus ojos, Nueve Reinas, El Marginal, Los Simuladores, Casados con Hijos, Okupas",
+  Lugares: "Bariloche, Mar del Plata, Cataratas, Mendoza, Salta, Caminito, Ushuaia, Córdoba",
+  Deportes: "Fútbol, Truco, Pato, Automovilismo, Tenis, Rugby, Básquet, Polo, Boxeo",
+  Famosos: "Mirtha Legrand, Moria Casán, Charly García, Soda Stereo, Spinetta, Lali Espósito, Tini, Duki"
 };
 
 export const MIN_PLAYERS = 2;

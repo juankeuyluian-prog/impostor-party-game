@@ -10,9 +10,14 @@ export enum GamePhase {
 export interface GameState {
   players: string[];
   words: string[];
+  usedWords: string[];
   secretWord: string;
+  hintWord: string;
   impostorIndex: number;
   currentPlayerIndex: number;
   isRevealed: boolean;
   phase: GamePhase;
+  totalRounds: number;
+  currentRound: number;
+  useHints: boolean;
 }
