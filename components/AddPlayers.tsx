@@ -41,7 +41,6 @@ const AddPlayers: React.FC<AddPlayersProps> = ({ onConfirm, onBack, initialPlaye
       return;
     }
 
-    // Feedback de escala inmediato
     setIsSuccess(true);
     
     setTimeout(() => {
@@ -50,7 +49,6 @@ const AddPlayers: React.FC<AddPlayersProps> = ({ onConfirm, onBack, initialPlaye
       setNameInput('');
       setLastAddedIndex(newPlayers.length - 1);
       
-      // Auto-scroll suave al final
       setTimeout(() => {
         if (scrollRef.current) {
           scrollRef.current.scrollTo({
@@ -60,12 +58,10 @@ const AddPlayers: React.FC<AddPlayersProps> = ({ onConfirm, onBack, initialPlaye
         }
       }, 50);
 
-      // Reset de estado tras la animación de encogimiento
       setTimeout(() => {
         setIsSuccess(false);
       }, 300);
 
-      // Mantener el resaltado del nuevo item brevemente
       setTimeout(() => {
         setLastAddedIndex(null);
       }, 1200);
@@ -80,7 +76,7 @@ const AddPlayers: React.FC<AddPlayersProps> = ({ onConfirm, onBack, initialPlaye
   const canContinue = players.length >= MIN_PLAYERS;
 
   return (
-    <div className="glass-card rounded-[2.5rem] p-5 sm:p-10 space-y-5 sm:space-y-8 relative flex flex-col max-h-[90vh] sm:max-h-[800px] shadow-2xl transition-all duration-500 border-white/10">
+    <div className="glass-card rounded-[2.5rem] p-5 sm:p-10 space-y-5 sm:space-y-8 relative flex flex-col max-h-[90vh] sm:max-h-[800px] shadow-2xl border-white/10">
       {toast && (
         <div className="absolute top-6 left-1/2 -translate-x-1/2 bg-slate-950 border border-red-500/50 px-6 py-2.5 rounded-full text-[10px] font-black shadow-[0_0_30px_rgba(239,68,68,0.2)] z-[60] flex items-center gap-2 animate-in fade-in slide-in-from-top-6 whitespace-nowrap">
           <span className="text-red-500 animate-pulse">●</span> {toast.toUpperCase()}
@@ -110,8 +106,8 @@ const AddPlayers: React.FC<AddPlayersProps> = ({ onConfirm, onBack, initialPlaye
         </div>
       </div>
 
-      {/* Input Section con Feedback de Escala (Encogimiento) */}
-      <div className={`flex gap-2.5 shrink-0 relative transition-all duration-300 ${isError ? 'animate-shake' : ''} ${isSuccess ? 'scale-90 opacity-70' : 'scale-100 opacity-100'}`}>
+      {/* Input Section */}
+      <div className={`flex gap-2.5 shrink-0 relative transition-all duration-300 ${isError ? 'animate-shake' : ''} ${isSuccess ? 'scale-95 opacity-80' : 'scale-100 opacity-100'}`}>
         <div className="relative flex-1">
           <input 
             type="text" 
@@ -151,10 +147,10 @@ const AddPlayers: React.FC<AddPlayersProps> = ({ onConfirm, onBack, initialPlaye
         </button>
       </div>
 
-      {/* Player List con Efecto 'Pop-in' Suave */}
+      {/* Player List */}
       <div 
         ref={scrollRef}
-        className="flex-1 overflow-y-auto scrollbar-hide space-y-2.5 min-h-0 pr-1 mask-linear-fade transition-all duration-500"
+        className="flex-1 overflow-y-auto scrollbar-hide space-y-2.5 min-h-0 pr-1 transition-all duration-500"
       >
         {players.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 sm:py-20 text-slate-700 space-y-4 opacity-30 animate-pulse">
@@ -243,9 +239,6 @@ const AddPlayers: React.FC<AddPlayersProps> = ({ onConfirm, onBack, initialPlaye
         }
         .animate-ping-once {
           animation: ping-once 0.4s ease-out forwards;
-        }
-        .mask-linear-fade {
-          mask-image: linear-gradient(to bottom, black 92%, transparent 100%);
         }
       `}</style>
     </div>

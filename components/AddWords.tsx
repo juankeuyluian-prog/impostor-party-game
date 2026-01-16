@@ -34,7 +34,7 @@ const AddWords: React.FC<AddWordsProps> = ({ playerCount, onStart, onBack, initi
   const roundOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
   return (
-    <div className="glass-card rounded-[2.5rem] p-6 sm:p-10 space-y-6 sm:space-y-8 shadow-2xl overflow-hidden flex flex-col max-h-[95vh] sm:max-h-[850px] transition-all border-white/10">
+    <div className="glass-card rounded-[2.5rem] p-6 sm:p-10 space-y-6 sm:space-y-8 shadow-2xl overflow-hidden flex flex-col max-h-[95vh] sm:max-h-[850px] border-white/10">
       {/* Header Section */}
       <div className="grid grid-cols-3 items-center shrink-0">
         <div className="flex justify-start">
@@ -73,7 +73,7 @@ const AddWords: React.FC<AddWordsProps> = ({ playerCount, onStart, onBack, initi
         </div>
       </div>
 
-      {/* Round Selection - Refined Segmented Control */}
+      {/* Round Selection */}
       <div className="space-y-4 shrink-0 px-1">
         <label className="text-[10px] sm:text-[11px] text-slate-500 uppercase font-black tracking-[0.3em] block text-center opacity-80">Cantidad de Rondas</label>
         <div className="bg-slate-900/80 p-1 rounded-2xl flex relative border border-white/5 shadow-inner">
@@ -129,7 +129,7 @@ const AddWords: React.FC<AddWordsProps> = ({ playerCount, onStart, onBack, initi
         />
       </div>
 
-      {/* Categories - Centered Symmetry */}
+      {/* Categories */}
       <div className="shrink-0 space-y-3 px-1">
         <p className="text-[9px] sm:text-[10px] text-slate-600 uppercase font-black tracking-[0.3em] text-center opacity-50">Categorías rápidas</p>
         <div className="flex flex-wrap gap-2.5 justify-center pb-2">

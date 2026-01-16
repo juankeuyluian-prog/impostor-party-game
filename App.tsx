@@ -24,17 +24,21 @@ const App: React.FC = () => {
   });
 
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [transitionDirection, setTransitionDirection] = useState<'forward' | 'backward'>('forward');
   const [isSwitchingPlayer, setIsSwitchingPlayer] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
 
-  const transitionTo = (newPhase: GamePhase) => {
+  const transitionTo = (newPhase: GamePhase, direction: 'forward' | 'backward' = 'forward') => {
+    setTransitionDirection(direction);
     setIsTransitioning(true);
+    
     setTimeout(() => {
       setGameState(prev => ({ ...prev, phase: newPhase }));
+      // We wait a tiny bit for the new component to mount before triggering the "in" animation
       setTimeout(() => {
         setIsTransitioning(false);
-      }, 50);
-    }, 450);
+      }, 40);
+    }, 350); // Snappier timing for better feel
   };
 
   const generateAIHint = async (word: string): Promise<string> => {
@@ -52,12 +56,12 @@ const App: React.FC = () => {
   };
 
   const createGame = () => {
-    transitionTo(GamePhase.ADD_PLAYERS);
+    transitionTo(GamePhase.ADD_PLAYERS, 'forward');
   };
 
   const handlePlayersConfirmed = (players: string[]) => {
     setGameState(prev => ({ ...prev, players }));
-    transitionTo(GamePhase.ADD_WORDS);
+    transitionTo(GamePhase.ADD_WORDS, 'forward');
   };
 
   const handleBack = () => {
@@ -67,11 +71,11 @@ const App: React.FC = () => {
       [GamePhase.REVEAL]: GamePhase.ADD_WORDS,
     };
     const target = prevPhases[gameState.phase];
-    if (target) transitionTo(target);
+    if (target) transitionTo(target, 'backward');
   };
 
   const handleEndRound = () => {
-    transitionTo(GamePhase.GAME_OVER);
+    transitionTo(GamePhase.GAME_OVER, 'forward');
   };
 
   const selectNewSecretWord = (availableWords: string[]) => {
@@ -84,13 +88,12 @@ const App: React.FC = () => {
     const { secret, rawWord } = selectNewSecretWord(words);
     const randomImpostor = Math.floor(Math.random() * gameState.players.length);
     
-    // El hint ahora se cargará bajo demanda en Reveal para mejor UX
     setGameState(prev => ({
       ...prev,
       words,
       usedWords: [rawWord],
       secretWord: secret,
-      hintWord: '', // Reiniciar pista
+      hintWord: '', 
       impostorIndex: randomImpostor,
       currentPlayerIndex: 0,
       isRevealed: false,
@@ -99,10 +102,9 @@ const App: React.FC = () => {
       useHints
     }));
     
-    // Pequeño delay artificial para que el usuario sienta la "preparación" del juego
     setTimeout(() => {
       setIsGenerating(false);
-      transitionTo(GamePhase.REVEAL);
+      transitionTo(GamePhase.REVEAL, 'forward');
     }, 1200);
   };
 
@@ -118,7 +120,7 @@ const App: React.FC = () => {
       ...prev,
       usedWords: availableWords.length > 0 ? [...prev.usedWords, rawWord] : [rawWord],
       secretWord: secret,
-      hintWord: '', // Reiniciar pista
+      hintWord: '', 
       impostorIndex: randomImpostor,
       currentPlayerIndex: 0,
       isRevealed: false,
@@ -127,7 +129,7 @@ const App: React.FC = () => {
 
     setTimeout(() => {
       setIsGenerating(false);
-      transitionTo(GamePhase.REVEAL);
+      transitionTo(GamePhase.REVEAL, 'forward');
     }, 1200);
   };
 
@@ -140,12 +142,12 @@ const App: React.FC = () => {
         setGameState(prev => ({
           ...prev,
           currentPlayerIndex: prev.currentPlayerIndex + 1,
-          hintWord: '' // Limpiar pista para el siguiente jugador por seguridad
+          hintWord: '' 
         }));
         setIsSwitchingPlayer(false);
       }, 700);
     } else {
-      transitionTo(GamePhase.GAME_OVER);
+      transitionTo(GamePhase.GAME_OVER, 'forward');
     }
   };
 
@@ -173,6 +175,18 @@ const App: React.FC = () => {
       currentRound: 1,
       useHints: true
     });
+    transitionTo(GamePhase.HOME, 'backward');
+  };
+
+  // Improved transition classes
+  const getTransitionClasses = () => {
+    if (!isTransitioning) return 'opacity-100 translate-x-0 blur-0 scale-100';
+    
+    if (transitionDirection === 'forward') {
+      return 'opacity-0 -translate-x-12 blur-sm scale-[0.97]';
+    } else {
+      return 'opacity-0 translate-x-12 blur-sm scale-[0.97]';
+    }
   };
 
   return (
@@ -197,11 +211,7 @@ const App: React.FC = () => {
         </div>
       )}
 
-      <div className={`w-full max-w-lg transition-all duration-700 cubic-bezier(0.23, 1, 0.32, 1) flex flex-col justify-center min-h-0 ${
-        isTransitioning 
-        ? 'opacity-0 translate-x-12 blur-sm scale-95' 
-        : 'opacity-100 translate-x-0 blur-0 scale-100'
-      }`}>
+      <div className={`w-full max-w-lg transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1) flex flex-col justify-center min-h-0 ${getTransitionClasses()}`}>
         {gameState.phase === GamePhase.HOME && (
           <Home onCreate={createGame} />
         )}

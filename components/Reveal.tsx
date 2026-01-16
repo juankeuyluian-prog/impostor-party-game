@@ -47,8 +47,6 @@ const Reveal: React.FC<RevealProps> = ({
     setIsGenerating(false);
   };
 
-  const showHintSection = useHints && isImpostor;
-
   return (
     <div className="w-full flex flex-col items-center justify-between min-h-[90vh] py-4 animate-in fade-in duration-700 relative">
       
@@ -130,15 +128,31 @@ const Reveal: React.FC<RevealProps> = ({
                     {isImpostor ? (
                       isGenerating ? (
                         <div className="flex flex-col items-center space-y-4 animate-in fade-in zoom-in duration-300">
-                          <div className="relative">
-                            <div className="absolute inset-0 bg-amber-500/20 blur-xl animate-pulse rounded-full"></div>
+                          <div className="relative w-20 h-20 flex items-center justify-center">
+                            {/* Scanning Orbits */}
+                            <div className="absolute inset-0 border border-amber-500/10 rounded-full animate-spin-slow"></div>
+                            <div className="absolute inset-2 border-t border-amber-500/30 rounded-full animate-spin"></div>
+                            
+                            {/* Neural Lens Icon */}
                             <svg className="w-14 h-14 text-amber-500 relative z-10" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M9.5 3C7.567 3 6 4.567 6 6.5C6 7.218 6.216 7.884 6.586 8.44C5.074 8.89 4 10.316 4 12C4 13.684 5.074 15.11 6.586 15.56C6.216 16.116 6 16.782 6 17.5C6 19.433 7.567 21 9.5 21C10.604 21 11.583 20.487 12.214 19.687C12.845 20.487 13.824 21 14.928 21C16.861 21 18.428 19.433 18.428 17.5C18.428 16.782 18.212 16.116 17.842 15.56C19.354 15.11 20.428 13.684 20.428 12C20.428 10.316 19.354 8.89 17.842 8.44C18.212 7.884 18.428 7.218 18.428 6.5C18.428 4.567 16.861 3 14.928 3C13.824 3 12.845 3.513 12.214 4.313C11.583 3.513 10.604 3 9.5 3Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="animate-neural-active" />
-                              <circle cx="9.5" cy="7" r="1" fill="currentColor" className="animate-synapse-1" />
-                              <circle cx="14.5" cy="17" r="1" fill="currentColor" className="animate-synapse-2" />
+                              {/* Magnifying Glass Frame */}
+                              <circle cx="10" cy="10" r="7" stroke="currentColor" strokeWidth="1.5" className="animate-pulse" />
+                              <path d="M21 21L15 15" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+                              
+                              {/* Neural Core inside lens */}
+                              <path d="M10 7C9 7 8 8 8 9.5C8 10.5 8.5 11 9 11.5C8.5 12 8 12.5 8 13.5C8 15 9.5 16 11 16" stroke="currentColor" strokeWidth="1" strokeLinecap="round" className="animate-neural-active opacity-60" />
+                              <path d="M10 7C11 7 12 8 12 9.5C12 10.5 11.5 11 11 11.5C11.5 12 12 12.5 12 13.5C12 15 10.5 16 9 16" stroke="currentColor" strokeWidth="1" strokeLinecap="round" className="animate-neural-active opacity-60" />
+                              
+                              {/* Digital Artifacts */}
+                              <rect x="9.5" y="9" width="1" height="1" fill="currentColor" className="animate-synapse-1" />
+                              <rect x="11.5" y="12" width="1" height="1" fill="currentColor" className="animate-synapse-2" />
+                              <rect x="8.5" y="11.5" width="1" height="1" fill="currentColor" className="animate-synapse-3" />
                             </svg>
+                            
+                            {/* Laser Scan Effect */}
+                            <div className="absolute left-1/2 -translate-x-1/2 w-12 h-[2px] bg-amber-400/50 blur-[1px] shadow-[0_0_8px_rgba(251,191,36,0.8)] animate-laser-scan z-20"></div>
                           </div>
-                          <span className="text-[9px] font-black text-amber-500/60 uppercase tracking-[0.4em] animate-pulse">Consultando Red Neuronal</span>
+                          <span className="text-[9px] font-black text-amber-500 uppercase tracking-[0.4em] animate-pulse">Buscando Indicios...</span>
                         </div>
                       ) : hintWord ? (
                         <span className="text-2xl sm:text-3xl font-black text-amber-400 tracking-tight leading-tight uppercase animate-in zoom-in duration-500 drop-shadow-[0_0_8px_rgba(251,191,36,0.4)]">
@@ -147,12 +161,12 @@ const Reveal: React.FC<RevealProps> = ({
                       ) : (
                         <button 
                           onClick={handleVerPista}
-                          className="px-8 py-4 bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl text-white font-black text-sm uppercase tracking-widest shadow-lg shadow-orange-500/20 active:scale-95 transition-all hover:brightness-110 flex items-center gap-3"
+                          className="px-8 py-4 bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl text-white font-black text-sm uppercase tracking-widest shadow-lg shadow-orange-500/20 active:scale-95 transition-all hover:brightness-110 flex items-center gap-3 group/hint"
                         >
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                          <svg className="w-5 h-5 group-hover/hint:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
                           </svg>
-                          VER PISTA
+                          OBTENER PISTA
                         </button>
                       )
                     ) : (
@@ -214,23 +228,32 @@ const Reveal: React.FC<RevealProps> = ({
         .rotate-y-180 { transform: rotateY(180deg); }
 
         @keyframes neural-active {
-          0%, 100% { transform: scale(1); filter: brightness(1); }
-          50% { transform: scale(1.05); filter: brightness(1.5); }
+          0%, 100% { opacity: 0.4; transform: scale(1); }
+          50% { opacity: 1; transform: scale(1.1); }
         }
         .animate-neural-active {
           animation: neural-active 1.5s ease-in-out infinite;
         }
 
         @keyframes synapse-firing {
-          0% { opacity: 0; transform: translate(0, 0); }
-          50% { opacity: 1; }
-          100% { opacity: 0; transform: translate(10px, -5px); }
+          0%, 100% { opacity: 0; transform: scale(0.5); }
+          50% { opacity: 1; transform: scale(1.5); }
         }
-        .animate-synapse-1 {
-          animation: synapse-firing 1s ease-in-out infinite;
+        .animate-synapse-1 { animation: synapse-firing 1s ease-in-out infinite; }
+        .animate-synapse-2 { animation: synapse-firing 1.2s ease-in-out infinite 0.2s; }
+        .animate-synapse-3 { animation: synapse-firing 0.8s ease-in-out infinite 0.4s; }
+
+        @keyframes laser-scan {
+          0%, 100% { top: 25%; opacity: 0; }
+          10%, 90% { opacity: 1; }
+          50% { top: 75%; }
         }
-        .animate-synapse-2 {
-          animation: synapse-firing 1.2s ease-in-out infinite 0.3s;
+        .animate-laser-scan {
+          animation: laser-scan 2s ease-in-out infinite;
+        }
+
+        .animate-spin-slow {
+          animation: spin 6s linear infinite;
         }
 
         .glitch-text {
