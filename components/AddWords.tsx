@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useRef, useEffect, useState } from 'react';
 import { WORD_CATEGORIES, MIN_WORDS } from '../constants.ts';
 
 interface AddWordsProps {
@@ -9,153 +10,204 @@ interface AddWordsProps {
 }
 
 const AddWords: React.FC<AddWordsProps> = ({ playerCount, onStart, onBack, initialUseHints }) => {
-  const [wordsText, setWordsText] = useState('');
+  const [words, setWords] = useState<string[]>([]);
+  const [inputValue, setInputValue] = useState('');
   const [rounds, setRounds] = useState(3);
   const [useHints, setUseHints] = useState(initialUseHints);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
+  const isScrollingRef = useRef(false);
   
+  const roundOptions = [1, 2, 3, 4, 5];
+
+  useEffect(() => {
+    const container = scrollRef.current;
+    if (!container) return;
+
+    const handleScroll = () => {
+      if (isScrollingRef.current) return;
+      const containerRect = container.getBoundingClientRect();
+      const centerX = containerRect.left + containerRect.width / 2;
+      let closestRound = rounds;
+      let minDistance = Infinity;
+
+      const items = container.querySelectorAll('[data-round]');
+      items.forEach((item) => {
+        const rect = item.getBoundingClientRect();
+        const itemCenterX = rect.left + rect.width / 2;
+        const distance = Math.abs(centerX - itemCenterX);
+        if (distance < minDistance) {
+          minDistance = distance;
+          closestRound = parseInt(item.getAttribute('data-round') || '3');
+        }
+      });
+
+      if (closestRound !== rounds) setRounds(closestRound);
+    };
+
+    container.addEventListener('scroll', handleScroll, { passive: true });
+    return () => container.removeEventListener('scroll', handleScroll);
+  }, [rounds]);
+
+  const scrollToRound = (round: number, behavior: ScrollBehavior = 'smooth') => {
+    if (!scrollRef.current) return;
+    const activeEl = scrollRef.current.querySelector(`[data-round="${round}"]`) as HTMLElement;
+    if (activeEl) {
+      isScrollingRef.current = true;
+      const offsetLeft = activeEl.offsetLeft;
+      const containerWidth = scrollRef.current.offsetWidth;
+      const itemWidth = activeEl.offsetWidth;
+      scrollRef.current.scrollTo({
+        left: offsetLeft - (containerWidth / 2) + (itemWidth / 2),
+        behavior
+      });
+      setTimeout(() => { isScrollingRef.current = false; }, 500);
+    }
+  };
+
+  useEffect(() => {
+    scrollToRound(rounds, 'auto');
+  }, []);
+
+  const addWord = () => {
+    const trimmed = inputValue.trim();
+    if (trimmed && !words.includes(trimmed)) {
+      setWords([...words, trimmed]);
+      setInputValue('');
+      setTimeout(() => {
+        if (gridRef.current) gridRef.current.scrollTop = gridRef.current.scrollHeight;
+      }, 100);
+    }
+  };
+
+  const removeWord = (index: number) => {
+    setWords(words.filter((_, i) => i !== index));
+  };
+
   const handleCategoryClick = (cat: keyof typeof WORD_CATEGORIES) => {
-    const rawList = WORD_CATEGORIES[cat];
-    const formattedList = rawList.split(',').map(w => w.trim()).join('\n');
-    
-    setWordsText(prev => {
-      const existing = prev.trim();
-      return existing ? existing + '\n' + formattedList : formattedList;
+    const newWords = WORD_CATEGORIES[cat].split(',').map(w => w.trim());
+    setWords(prev => {
+      const combined = [...prev, ...newWords];
+      return Array.from(new Set(combined));
     });
   };
 
-  const handleClear = () => {
-    setWordsText('');
-  };
-
-  const getCleanWords = () => wordsText.split(/\r?\n/).map(w => w.trim()).filter(w => w.length > 0);
-  const cleanWords = getCleanWords();
-  const canStart = cleanWords.length >= MIN_WORDS;
-
-  const roundOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+  const handleClear = () => setWords([]);
+  const canStart = words.length >= MIN_WORDS;
 
   return (
-    <div className="glass-card rounded-[2.5rem] p-6 sm:p-10 space-y-6 sm:space-y-8 shadow-2xl overflow-hidden flex flex-col max-h-[95vh] sm:max-h-[850px] border-white/10">
-      {/* Header Section */}
-      <div className="grid grid-cols-3 items-center shrink-0">
-        <div className="flex justify-start">
-          <button 
-            onClick={onBack}
-            className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-2xl bg-slate-800/80 border border-white/5 text-slate-400 hover:text-white transition-all active:scale-90"
-          >
-            <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
+    <div className="glass-card rounded-[3.5rem] p-6 sm:p-10 space-y-6 shadow-2xl overflow-hidden flex flex-col h-[94dvh] max-h-[900px] border-white/10 relative transition-all">
+      <div className="mist mist-1 bg-pink-500/10"></div>
+      
+      {/* Header */}
+      <div className="flex justify-between items-center shrink-0 relative z-10">
+        <button onClick={onBack} className="btn-press w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-900/60 border border-white/5 text-slate-400">
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7" /></svg>
+        </button>
+        <div className="text-center">
+          <h2 className="text-xl font-black tracking-tighter uppercase italic text-pink-500">Configuración</h2>
         </div>
-        
-        <div className="flex justify-center">
-          <div className="bg-pink-500/20 p-2.5 sm:p-3 rounded-2xl text-pink-500 border border-pink-500/20 shadow-[0_0_20px_rgba(236,72,153,0.3)]">
-            <svg className="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-            </svg>
-          </div>
-        </div>
-
-        <div className="flex justify-end">
-          <button 
-            onClick={() => setUseHints(!useHints)}
-            className={`w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-2xl transition-all active:scale-90 border ${
-              useHints 
-                ? 'bg-amber-500/20 border-amber-500/30 text-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.2)]' 
-                : 'bg-slate-800/80 border-white/5 text-slate-500'
-            }`}
-            title={useHints ? "Pistas activadas" : "Pistas desactivadas"}
-          >
-            <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-            </svg>
-          </button>
-        </div>
+        <button 
+          onClick={() => setUseHints(!useHints)}
+          className={`w-12 h-12 flex items-center justify-center rounded-2xl transition-all border ${useHints ? 'bg-amber-500/20 border-amber-500/30 text-amber-500' : 'bg-slate-900/60 border-white/5 text-slate-600'}`}
+        >
+          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M11 3a1 1 0 10-2 0v1a1 1 0 102 0V3zM15.657 5.757a1 1 0 00-1.414-1.414l-.707.707a1 1 0 001.414 1.414l.707-.707zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zM5.05 6.464A1 1 0 106.464 5.05l-.707-.707a1 1 0 00-1.414 1.414l.707.707zM5 10a1 1 0 01-1 1H3a1 1 0 110-2h1a1 1 0 011 1zM8 16v-1a1 1 0 112 0v1a1 1 0 11-2 0zM13.657 15.657a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414l.707.707zM16 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1z" /></svg>
+        </button>
       </div>
 
-      {/* Round Selection */}
-      <div className="space-y-4 shrink-0 px-1">
-        <label className="text-[10px] sm:text-[11px] text-slate-500 uppercase font-black tracking-[0.3em] block text-center opacity-80">Cantidad de Rondas</label>
-        <div className="bg-slate-900/80 p-1 rounded-2xl flex relative border border-white/5 shadow-inner">
-          <div 
-            className="absolute top-1 bottom-1 bg-gradient-to-r from-pink-500 to-rose-500 rounded-xl transition-all duration-300 ease-out shadow-[0_4px_15px_rgba(236,72,153,0.4)]"
-            style={{ 
-              left: `${(roundOptions.indexOf(rounds) / roundOptions.length) * 100 + 0.1}%`,
-              width: `${(100 / roundOptions.length) - 0.2}%`
-            }}
-          />
+      {/* Rounds Selector */}
+      <div className="space-y-2 shrink-0 relative z-10">
+        <div className="flex justify-between items-center px-1">
+          <label className="text-[10px] text-slate-500 uppercase font-black tracking-[0.4em]">RONDAS</label>
+          <span className="text-pink-400 font-black text-[10px] uppercase bg-pink-500/10 px-3 py-1 rounded-full border border-pink-500/20">{rounds}</span>
+        </div>
+        <div ref={scrollRef} className="flex gap-4 overflow-x-auto scrollbar-hide py-2 px-[calc(50%-1.5rem)] snap-x snap-mandatory">
           {roundOptions.map(opt => (
-            <button
+            <div
               key={opt}
-              onClick={() => setRounds(opt)}
-              className={`flex-1 py-3 sm:py-4 rounded-xl font-black text-xs sm:text-base transition-all relative z-10 tracking-tighter ${
-                rounds === opt ? 'text-white' : 'text-slate-500 hover:text-slate-400'
-              }`}
+              data-round={opt}
+              onClick={() => { setRounds(opt); scrollToRound(opt); }}
+              className={`flex-none w-12 h-12 rounded-2xl font-black text-lg transition-all flex items-center justify-center border-2 snap-center cursor-pointer ${rounds === opt ? 'bg-pink-600 border-pink-400 text-white scale-110 shadow-lg' : 'bg-slate-900/40 border-slate-800 text-slate-600 scale-90 opacity-40'}`}
             >
               {opt}
-            </button>
+            </div>
           ))}
         </div>
       </div>
 
-      {/* Words Input Area */}
-      <div className="space-y-3 flex-1 flex flex-col min-h-0 relative">
-        <div className="flex justify-between items-center px-1 shrink-0">
-          <div className="flex items-center gap-1.5 sm:gap-2">
-             <label className="text-[9px] sm:text-[11px] text-slate-500 uppercase font-black tracking-[0.25em] opacity-80">PALABRAS:</label>
-             <span className={`text-[7px] sm:text-[8px] font-black px-1.5 py-0.5 rounded border ${useHints ? 'text-amber-400 border-amber-400/20 bg-amber-400/10' : 'text-slate-600 border-slate-700 bg-slate-800'} uppercase tracking-wider shrink-0`}>
-                {useHints ? 'CON IA PISTAS' : 'SIN PISTAS'}
-             </span>
-             {wordsText.length > 0 && (
-              <button 
-                onClick={handleClear}
-                className="text-[7px] sm:text-[8px] font-black text-red-400 uppercase tracking-wider hover:text-red-300 transition-colors flex items-center gap-1 bg-red-500/10 px-1.5 py-0.5 rounded border border-red-500/20 shrink-0"
-              >
-                BORRAR
-              </button>
-            )}
-          </div>
-          <div className="flex items-center">
-            <div className="text-[7px] sm:text-[9px] font-black text-pink-500 uppercase tracking-widest bg-pink-500/10 px-1.5 py-0.5 rounded border border-pink-500/20">
-              {cleanWords.length}
-            </div>
-          </div>
+      {/* Word Input & Grid Section */}
+      <div className="flex-1 flex flex-col min-h-0 space-y-4 relative z-10">
+        <div className="flex gap-2">
+          <input 
+            type="text"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && addWord()}
+            placeholder="Añadir palabra..."
+            className="flex-1 bg-slate-900/50 border border-white/10 rounded-2xl px-5 py-4 outline-none focus:border-pink-500/50 transition-all font-bold placeholder:text-slate-700"
+          />
+          <button onClick={addWord} className="btn-press w-14 bg-pink-500 text-slate-950 rounded-2xl font-black text-xl">+</button>
         </div>
-        <textarea 
-          value={wordsText}
-          onChange={(e) => setWordsText(e.target.value)}
-          placeholder="Escribí una palabra por línea.&#10;Ej: Fernet&#10;Messi&#10;Mate&#10;..."
-          className="w-full flex-1 min-h-[120px] sm:min-h-[160px] bg-slate-900/60 border border-slate-800 rounded-3xl p-5 sm:p-7 outline-none focus:border-pink-500/50 focus:ring-1 focus:ring-pink-500/10 transition-all text-sm sm:text-lg font-bold leading-relaxed resize-none scrollbar-hide text-pink-50 placeholder:text-slate-700 shadow-inner"
-        />
+
+        <div className="flex justify-between items-center px-1">
+          <label className="text-[10px] text-slate-500 uppercase font-black tracking-[0.4em]">LISTA DE PALABRAS ({words.length})</label>
+          {words.length > 0 && (
+            <button onClick={handleClear} className="text-[10px] font-black text-red-400/60 hover:text-red-400 transition-colors">LIMPIAR TODO</button>
+          )}
+        </div>
+
+        <div 
+          ref={gridRef}
+          className="flex-1 overflow-y-auto scrollbar-hide p-1"
+        >
+          {words.length === 0 ? (
+            <div className="h-full flex flex-col items-center justify-center text-slate-700 opacity-40 space-y-3">
+              <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>
+              <p className="text-[10px] uppercase font-black tracking-widest">Sin palabras añadidas</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {words.map((word, i) => (
+                <div 
+                  key={`${word}-${i}`}
+                  className="bg-white/5 border border-white/10 rounded-2xl p-4 flex items-center justify-between group hover:bg-white/10 hover:border-pink-500/30 transition-all animate-in zoom-in duration-300"
+                >
+                  <span className="font-bold text-slate-200 text-sm truncate pr-2">{word}</span>
+                  <button onClick={() => removeWord(i)} className="text-slate-600 hover:text-red-400 transition-colors">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M6 18L18 6M6 6l12 12" /></svg>
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Categories */}
-      <div className="shrink-0 space-y-3 px-1">
-        <p className="text-[9px] sm:text-[10px] text-slate-600 uppercase font-black tracking-[0.3em] text-center opacity-50">Categorías rápidas</p>
-        <div className="flex flex-wrap gap-2.5 justify-center pb-2">
+      <div className="shrink-0 space-y-3 relative z-10">
+        <p className="text-[9px] text-slate-600 uppercase font-black tracking-[0.4em] text-center">AÑADIR TEMÁTICA</p>
+        <div className="flex flex-wrap gap-2 justify-center">
           {(Object.keys(WORD_CATEGORIES) as Array<keyof typeof WORD_CATEGORIES>).map(cat => (
             <button 
               key={cat}
               onClick={() => handleCategoryClick(cat)}
-              className="text-[9px] sm:text-[10px] font-black px-4 py-2.5 rounded-xl bg-slate-800/60 border border-white/5 hover:border-pink-500/30 transition-all text-slate-400 hover:text-white active:scale-95 shadow-sm"
+              className="text-[9px] font-black px-4 py-2 rounded-xl bg-slate-900/60 border border-white/5 hover:border-pink-500/40 text-slate-500 hover:text-pink-400 transition-all whitespace-nowrap"
             >
-              {cat.toUpperCase()}
+              {cat}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Action Button */}
-      <div className="shrink-0 pt-2">
+      {/* Start Button */}
+      <div className="shrink-0 pt-2 relative z-10">
         <button 
           disabled={!canStart}
-          onClick={() => onStart(cleanWords, rounds, useHints)}
-          className="w-full py-5 sm:py-6 rounded-3xl font-black text-base sm:text-xl transition-all flex items-center justify-center gap-4 uppercase tracking-[0.2em] border-b-4 bg-white text-slate-950 border-slate-300 shadow-[0_15px_30px_rgba(0,0,0,0.3)] active:translate-y-1 active:border-b-0 hover:brightness-105 active:brightness-95 disabled:bg-slate-800/50 disabled:text-slate-600 disabled:cursor-not-allowed disabled:border-slate-900 disabled:opacity-50"
+          onClick={() => onStart(words, rounds, useHints)}
+          className={`btn-press w-full py-6 rounded-[2rem] font-black text-xl transition-all flex items-center justify-center gap-4 tracking-widest border-b-[6px] bg-white text-slate-950 border-slate-300 shadow-2xl disabled:opacity-20`}
         >
-          ¡DALE!
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-          </svg>
+          COMENZAR
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
         </button>
       </div>
     </div>

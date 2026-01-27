@@ -13,7 +13,8 @@ export interface GameState {
   usedWords: string[];
   secretWord: string;
   hintWord: string;
-  impostorIndex: number;
+  impostorIndices: number[];
+  impostorCount: number;
   currentPlayerIndex: number;
   isRevealed: boolean;
   phase: GamePhase;

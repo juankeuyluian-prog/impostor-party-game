@@ -3,12 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#020617">
     <title>El Impostor - Party Game</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+            --safe-area-top: env(safe-area-inset-top, 0px);
+            --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+            --bg-dark: #020617;
+            --accent-cyan: #06b6d4;
+            --accent-pink: #ec4899;
         }
         * {
             box-sizing: border-box;
@@ -16,17 +21,19 @@
         }
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background: radial-gradient(circle at center, #1e1b4b 0%, #020617 100%);
+            background: var(--bg-dark);
             color: white;
             min-height: 100vh;
             min-height: 100dvh;
             margin: 0;
-            overflow-x: hidden;
+            overflow: hidden;
             position: relative;
         }
         #root {
             min-height: 100vh;
             min-height: 100dvh;
+            padding-top: var(--safe-area-top);
+            padding-bottom: var(--safe-area-bottom);
             display: flex;
             flex-direction: column;
             position: relative;
@@ -34,85 +41,58 @@
         }
         .glass-card {
             background: rgba(15, 23, 42, 0.65);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
-        .scrollbar-hide::-webkit-scrollbar {
-            display: none;
-        }
-        .scrollbar-hide {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-        /* Background Atmospheric Animation */
-        .bg-atmosphere {
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* High-End Background System */
+        .bg-system {
             position: fixed;
             inset: 0;
             z-index: 0;
-            overflow: hidden;
-            pointer-events: none;
+            background: radial-gradient(circle at 50% -20%, #1e293b 0%, #020617 100%);
         }
-        .bg-noise {
-            position: absolute;
-            inset: 0;
-            opacity: 0.03;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-            pointer-events: none;
-        }
-        .orb {
+        .glow-orb {
             position: absolute;
             border-radius: 50%;
             filter: blur(80px);
-            opacity: 0.15;
+            opacity: 0.12;
             mix-blend-mode: screen;
+            animation: orb-float 20s infinite alternate ease-in-out;
+            will-change: transform;
         }
-        .orb-1 {
-            width: 70vw;
-            height: 70vw;
-            background: radial-gradient(circle, #06b6d4, transparent 70%);
-            top: -15%;
-            left: -10%;
-            animation: float-orb-1 35s infinite alternate ease-in-out;
-        }
-        .orb-2 {
-            width: 60vw;
-            height: 60vw;
-            background: radial-gradient(circle, #10b981, transparent 70%);
-            bottom: -10%;
-            right: -5%;
-            animation: float-orb-2 42s infinite alternate ease-in-out;
-        }
-        .orb-3 {
-            width: 45vw;
-            height: 45vw;
-            background: radial-gradient(circle, #6366f1, transparent 70%);
-            top: 25%;
-            right: 10%;
-            animation: float-orb-3 50s infinite alternate ease-in-out;
-        }
-
-        @keyframes float-orb-1 {
-            0% { transform: translate(0, 0) scale(1) rotate(0deg); }
-            100% { transform: translate(8%, 12%) scale(1.1) rotate(15deg); }
-        }
-        @keyframes float-orb-2 {
-            0% { transform: translate(0, 0) scale(1) rotate(0deg); }
-            100% { transform: translate(-10%, -8%) scale(1.05) rotate(-12deg); }
-        }
-        @keyframes float-orb-3 {
+        @keyframes orb-float {
             0% { transform: translate(0, 0) scale(1); }
-            100% { transform: translate(-15%, 5%) scale(1.15); }
+            100% { transform: translate(10vw, 5vh) scale(1.2); }
         }
 
-        /* Custom animations for better UX */
-        @keyframes subtle-pulse {
-            0%, 100% { opacity: 0.1; transform: scale(1); }
-            50% { opacity: 0.15; transform: scale(1.05); }
+        /* Tactile Button Feedback */
+        .btn-press {
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        .animate-subtle-pulse {
-            animation: subtle-pulse 4s ease-in-out infinite;
+        .btn-press:active {
+            transform: scale(0.96) translateY(2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        /* Performance Optimized Scanline */
+        .scanline-overlay {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(
+                to bottom,
+                transparent 50%,
+                rgba(0, 0, 0, 0.05) 51%,
+                transparent 51%
+            );
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 100;
+            opacity: 0.3;
         }
     </style>
 <script type="importmap">
@@ -127,12 +107,11 @@
 </script>
 </head>
 <body>
-    <div class="bg-atmosphere" aria-hidden="true">
-        <div class="orb orb-1"></div>
-        <div class="orb orb-2"></div>
-        <div class="orb orb-3"></div>
-        <div class="bg-noise"></div>
+    <div class="bg-system">
+        <div class="glow-orb" style="width: 80vw; height: 80vw; background: #06b6d4; top: -10%; left: -20%;"></div>
+        <div class="glow-orb" style="width: 70vw; height: 70vw; background: #ec4899; bottom: -10%; right: -20%; animation-delay: -5s;"></div>
     </div>
+    <div class="scanline-overlay"></div>
     <div id="root"></div>
 </body>
 </html>
